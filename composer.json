@@ -1,0 +1,37 @@
+{
+    "name": "redaxo/psalm-plugin",
+    "description": "Psalm Plugin for REDAXO",
+    "type": "psalm-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "REDAXO Team",
+            "email": "info@redaxo.org"
+        }
+    ],
+    "require": {
+        "php": "^7.3 || ^8.0",
+        "ext-simplexml": "*",
+        "vimeo/psalm": "^4.11.0"
+    },
+    "require-dev": {
+        "redaxo/php-cs-fixer-config": "^1.0",
+        "redaxo/source": "^5.12"
+    },
+    "autoload": {
+        "psr-4": {
+            "Redaxo\\PsalmPlugin\\": "src"
+        }
+    },
+    "config": {
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "psalm" : {
+            "pluginClass": "Redaxo\\PsalmPlugin\\Plugin"
+        }
+    }
+}
