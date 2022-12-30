@@ -100,7 +100,7 @@ final class RexTypeReturnProvider implements MethodReturnTypeProviderInterface, 
         }
 
         if ($defaultExpr instanceof ConstFetch && 'null' === $defaultExpr->name->parts[0]) {
-            $type->addType(new TNull());
+            return $type->getBuilder()->addType(new TNull())->freeze();
         }
 
         return $type;

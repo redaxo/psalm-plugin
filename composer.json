@@ -12,7 +12,7 @@
     "require": {
         "php": "^7.3 || ^8.0",
         "ext-simplexml": "*",
-        "vimeo/psalm": "^4.11.0"
+        "vimeo/psalm": "^5.0.0"
     },
     "require-dev": {
         "redaxo/php-cs-fixer-config": "^1.0",
