@@ -22,6 +22,7 @@ use Psalm\Type\Atomic\TString;
 use Psalm\Type\Union;
 use rex_request;
 use rex_type;
+
 use function assert;
 use function in_array;
 
@@ -40,7 +41,7 @@ final class RexTypeReturnProvider implements MethodReturnTypeProviderInterface, 
         return ['rex_get', 'rex_post', 'rex_request', 'rex_server', 'rex_session', 'rex_cookie', 'rex_files', 'rex_env'];
     }
 
-    public static function getMethodReturnType(MethodReturnTypeProviderEvent $event): ?Type\Union
+    public static function getMethodReturnType(MethodReturnTypeProviderEvent $event): ?Union
     {
         if (rex_type::class === $event->getFqClasslikeName()) {
             if ('cast' === $event->getMethodNameLowercase()) {
@@ -78,7 +79,7 @@ final class RexTypeReturnProvider implements MethodReturnTypeProviderInterface, 
         return self::resolveType($argType->value, $argDefault->value ?? null);
     }
 
-    public static function getFunctionReturnType(FunctionReturnTypeProviderEvent $event): ?Type\Union
+    public static function getFunctionReturnType(FunctionReturnTypeProviderEvent $event): ?Union
     {
         $callArgs = $event->getCallArgs();
 
