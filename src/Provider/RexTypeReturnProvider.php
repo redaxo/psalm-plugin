@@ -100,7 +100,7 @@ final class RexTypeReturnProvider implements MethodReturnTypeProviderInterface, 
             return Type::getMixed();
         }
 
-        if ($defaultExpr instanceof ConstFetch && 'null' === $defaultExpr->name->parts[0]) {
+        if ($defaultExpr instanceof ConstFetch && 'null' === $defaultExpr->name->getFirst()) {
             return $type->getBuilder()->addType(new TNull())->freeze();
         }
 
