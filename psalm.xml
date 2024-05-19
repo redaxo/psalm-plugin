@@ -15,4 +15,12 @@
             <directory name="vendor" />
         </ignoreFiles>
     </projectFiles>
+    <issueHandlers>
+        <UndefinedClass>
+            <errorLevel type="suppress">
+                <referencedClass name="Redaxo\Core\Http\Request" />
+                <referencedClass name="Redaxo\Core\Util\Type" />
+            </errorLevel>
+        </UndefinedClass>
+    </issueHandlers>
 </psalm>

@@ -20,6 +20,8 @@ use Psalm\Type\Atomic\TMixed;
 use Psalm\Type\Atomic\TNull;
 use Psalm\Type\Atomic\TString;
 use Psalm\Type\Union;
+use Redaxo\Core\Http\Request;
+use Redaxo\Core\Util\Type as RedaxoType;
 use rex_request;
 use rex_type;
 
@@ -33,7 +35,7 @@ final class RexTypeReturnProvider implements MethodReturnTypeProviderInterface, 
 {
     public static function getClassLikeNames(): array
     {
-        return [rex_type::class, rex_request::class];
+        return [rex_type::class, rex_request::class, RedaxoType::class, Request::class];
     }
 
     public static function getFunctionIds(): array
@@ -43,7 +45,7 @@ final class RexTypeReturnProvider implements MethodReturnTypeProviderInterface, 
 
     public static function getMethodReturnType(MethodReturnTypeProviderEvent $event): ?Union
     {
-        if (rex_type::class === $event->getFqClasslikeName()) {
+        if (in_array($event->getFqClasslikeName(), [rex_type::class, RedaxoType::class], true)) {
             if ('cast' === $event->getMethodNameLowercase()) {
                 return self::resolveType($event->getCallArgs()[1]->value);
             }
