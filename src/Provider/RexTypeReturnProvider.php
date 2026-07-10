@@ -8,6 +8,7 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Scalar\String_;
+use Psalm\NodeTypeProvider;
 use Psalm\Plugin\EventHandler\Event\FunctionReturnTypeProviderEvent;
 use Psalm\Plugin\EventHandler\Event\MethodReturnTypeProviderEvent;
 use Psalm\Plugin\EventHandler\FunctionReturnTypeProviderInterface;
@@ -78,7 +79,7 @@ final class RexTypeReturnProvider implements MethodReturnTypeProviderInterface, 
                 return null;
         }
 
-        return self::resolveType($argType->value, $argDefault->value ?? null);
+        return self::resolveType($argType->value, $argDefault->value ?? null, $event->getSource()->getNodeTypeProvider());
     }
 
     public static function getFunctionReturnType(FunctionReturnTypeProviderEvent $event): ?Union
@@ -89,21 +90,32 @@ final class RexTypeReturnProvider implements MethodReturnTypeProviderInterface, 
             return null;
         }
 
-        return self::resolveType($callArgs[1]->value, $callArgs[2]->value ?? null);
+        return self::resolveType($callArgs[1]->value, $callArgs[2]->value ?? null, $event->getStatementsSource()->getNodeTypeProvider());
     }
 
-    private static function resolveType(Expr $typeExpr, ?Expr $defaultExpr = null): Union
+    private static function resolveType(Expr $typeExpr, ?Expr $defaultExpr = null, ?NodeTypeProvider $nodeTypeProvider = null): Union
     {
         if ($typeExpr instanceof String_) {
             $type = self::resolveTypeFromString($typeExpr);
         } elseif ($typeExpr instanceof Array_) {
-            $type = self::resolveTypeFromArray($typeExpr);
+            $type = self::resolveTypeFromArray($typeExpr, $nodeTypeProvider);
         } else {
             return Type::getMixed();
         }
 
         if ($defaultExpr instanceof ConstFetch && 'null' === $defaultExpr->name->getFirst()) {
             return $type->getBuilder()->addType(new TNull())->freeze();
+        }
+
+        // The empty string as default is cast to the requested type, any other
+        // default value is returned as-is (uncast) when the key is missing,
+        // so its inferred type must be part of the return type.
+        if (null !== $defaultExpr && !($defaultExpr instanceof String_ && '' === $defaultExpr->value) && null !== $nodeTypeProvider) {
+            $defaultType = $nodeTypeProvider->getType($defaultExpr);
+
+            if (null !== $defaultType) {
+                return Type::combineUnionTypes($type, $defaultType);
+            }
         }
 
         return $type;
@@ -138,7 +150,7 @@ final class RexTypeReturnProvider implements MethodReturnTypeProviderInterface, 
         return Type::getMixed();
     }
 
-    private static function resolveTypeFromArray(Array_ $array): Union
+    private static function resolveTypeFromArray(Array_ $array, ?NodeTypeProvider $nodeTypeProvider = null): Union
     {
         $fallback = new Union([new TArray([
             new Union([new TString()]),
@@ -171,7 +183,7 @@ final class RexTypeReturnProvider implements MethodReturnTypeProviderInterface, 
             if (!isset($subItems[1])) {
                 $type = Type::getMixed();
             } else {
-                $type = self::resolveType($subItems[1]->value, $subItems[2]->value ?? null);
+                $type = self::resolveType($subItems[1]->value, $subItems[2]->value ?? null, $nodeTypeProvider);
             }
 
             $types[$key] = $type;
