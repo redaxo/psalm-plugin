@@ -193,6 +193,6 @@ final class RexTypeReturnProvider implements MethodReturnTypeProviderInterface, 
             return $fallback;
         }
 
-        return new Union([new TKeyedArray($types)]);
+        return new Union([TKeyedArray::make($types)]);
     }
 }
